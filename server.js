@@ -29,9 +29,11 @@ app.get('/', (req, res) => {
 
 // Importa las rutas
 const usuarioRoutes = require('./routes/usuarioRoutes');
+const espacioRoutes = require('./routes/espacioRoutes');
 
 // Middleware de rutas
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/espacios', espacioRoutes);
 
 // Iniciar el servidor
 app.listen(port, () => {

@@ -4,6 +4,13 @@ const router = express.Router();
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const authMiddleware = require('../middlewares/authMiddleware');
+const {
+    obtenerUsuarios,
+    obtenerUsuarioPorId,
+    actualizarUsuario,
+    eliminarUsuario
+} = require('../controllers/usuarioController');
 
 // Ruta para registrar un nuevo usuario
 router.post('/register', async (req, res) => {
@@ -34,5 +41,11 @@ router.post('/login', async (req, res) => {
         res.status(400).send(error);
     }
 });
+
+// Rutas protegidas
+router.get('/', authMiddleware, obtenerUsuarios);
+router.get('/:id', authMiddleware, obtenerUsuarioPorId);
+router.put('/:id', authMiddleware, actualizarUsuario);
+router.delete('/:id', authMiddleware, eliminarUsuario);
 
 module.exports = router;
