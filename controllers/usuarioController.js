@@ -15,8 +15,8 @@ exports.registrarUsuario = async (req, res) => {
         await nuevoUsuario.save();
         res.status(201).json(nuevoUsuario);
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({ message: 'El usuario ya existe' });
+        if (error.code === 11000) { 
+            return res.status(400).json({ message: 'El usuario ya existe' }); 
         }
         res.status(500).json({ message: error.message });
     }
@@ -85,6 +85,20 @@ exports.eliminarUsuario = async (req, res) => {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
         res.status(200).json({ message: 'Usuario eliminado' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Actualizar el rol de un usuario
+exports.actualizarRolUsuario = async (req, res) => {
+    try {
+        const { rol } = req.body;
+        const usuario = await Usuario.findByIdAndUpdate(req.params.id, { rol }, { new: true });
+        if (!usuario) {
+            return res.status(404).json({ message: 'Usuario no encontrado' });
+        }
+        res.status(200).json(usuario);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
