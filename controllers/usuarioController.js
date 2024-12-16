@@ -1,4 +1,3 @@
-// controllers/usuarioController.js
 const Usuario = require('../models/Usuario');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -16,6 +15,9 @@ exports.registrarUsuario = async (req, res) => {
         await nuevoUsuario.save();
         res.status(201).json(nuevoUsuario);
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'El usuario ya existe' });
+        }
         res.status(500).json({ message: error.message });
     }
 };

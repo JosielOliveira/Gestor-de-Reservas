@@ -1,69 +1,61 @@
 const Espacio = require('../models/Espacio');
 
 // Obtener todos los espacios
-const obtenerEspacios = async (req, res) => {
+exports.obtenerEspacios = async (req, res) => {
     try {
         const espacios = await Espacio.find();
-        res.send(espacios);
+        res.status(200).json(espacios);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Obtener un espacio por ID
-const obtenerEspacioPorId = async (req, res) => {
+exports.obtenerEspacioPorId = async (req, res) => {
     try {
         const espacio = await Espacio.findById(req.params.id);
         if (!espacio) {
-            return res.status(404).send('Espacio no encontrado');
+            return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-        res.send(espacio);
+        res.status(200).json(espacio);
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Crear un nuevo espacio
-const crearEspacio = async (req, res) => {
+exports.crearEspacio = async (req, res) => {
     try {
-        const espacio = new Espacio(req.body);
-        await espacio.save();
-        res.status(201).send(espacio);
+        const nuevoEspacio = new Espacio(req.body);
+        await nuevoEspacio.save();
+        res.status(201).json(nuevoEspacio);
     } catch (error) {
-        res.status(400).send(error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Actualizar un espacio
-const actualizarEspacio = async (req, res) => {
+exports.actualizarEspacio = async (req, res) => {
     try {
-        const espacio = await Espacio.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+        const espacio = await Espacio.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!espacio) {
-            return res.status(404).send('Espacio no encontrado');
+            return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-        res.send(espacio);
+        res.status(200).json(espacio);
     } catch (error) {
-        res.status(400).send(error);
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Eliminar un espacio
-const eliminarEspacio = async (req, res) => {
+exports.eliminarEspacio = async (req, res) => {
     try {
         const espacio = await Espacio.findByIdAndDelete(req.params.id);
         if (!espacio) {
-            return res.status(404).send('Espacio no encontrado');
+            return res.status(404).json({ message: 'Espacio no encontrado' });
         }
-        res.send(espacio);
+        res.status(200).json({ message: 'Espacio eliminado' });
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).json({ message: error.message });
     }
-};
-
-module.exports = {
-    obtenerEspacios,
-    obtenerEspacioPorId,
-    crearEspacio,
-    actualizarEspacio,
-    eliminarEspacio
 };
