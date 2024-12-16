@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
+const adminMiddleware = require('../middlewares/adminMiddleware');
 const {
     obtenerEspacios,
     obtenerEspacioPorId,
@@ -12,8 +13,8 @@ const {
 // Rutas protegidas
 router.get('/', authMiddleware, obtenerEspacios);
 router.get('/:id', authMiddleware, obtenerEspacioPorId);
-router.post('/', authMiddleware, crearEspacio);
-router.put('/:id', authMiddleware, actualizarEspacio);
-router.delete('/:id', authMiddleware, eliminarEspacio);
+router.post('/', authMiddleware, adminMiddleware, crearEspacio);
+router.put('/:id', authMiddleware, adminMiddleware, actualizarEspacio);
+router.delete('/:id', authMiddleware, adminMiddleware, eliminarEspacio);
 
 module.exports = router;

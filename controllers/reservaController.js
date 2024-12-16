@@ -55,15 +55,22 @@ exports.obtenerReservaPorId = async (req, res) => {
 // Actualizar una reserva
 exports.actualizarReserva = async (req, res) => {
     try {
+        const reserva = await Reserva.findById(req.params.id);
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva no encontrada' });
+        }
+        if (reserva.usuario.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'No tienes permiso para actualizar esta reserva' });
+        }
         const { espacio, fechaInicio, fechaFin } = req.body;
         const disponible = await validarDisponibilidad(espacio, fechaInicio, fechaFin);
         if (!disponible) {
             return res.status(400).json({ message: 'El espacio no está disponible en las fechas seleccionadas' });
         }
-        const reserva = await Reserva.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!reserva) {
-            return res.status(404).json({ message: 'Reserva no encontrada' });
-        }
+        reserva.espacio = espacio;
+        reserva.fechaInicio = fechaInicio;
+        reserva.fechaFin = fechaFin;
+        await reserva.save();
         res.status(200).json(reserva);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -73,10 +80,14 @@ exports.actualizarReserva = async (req, res) => {
 // Eliminar una reserva
 exports.eliminarReserva = async (req, res) => {
     try {
-        const reserva = await Reserva.findByIdAndDelete(req.params.id);
+        const reserva = await Reserva.findById(req.params.id);
         if (!reserva) {
             return res.status(404).json({ message: 'Reserva no encontrada' });
         }
+        if (reserva.usuario.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'No tienes permiso para eliminar esta reserva' });
+        }
+        await reserva.remove();
         res.status(200).json({ message: 'Reserva eliminada' });
     } catch (error) {
         res.status(500).json({ message: error.message });
