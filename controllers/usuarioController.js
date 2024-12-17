@@ -49,7 +49,7 @@ exports.iniciarSesion = async (req, res) => {
 
 // Obtener todos los usuarios
 exports.obtenerUsuarios = async (req, res) => {
-    try {
+    try { 
         const usuarios = await Usuario.find();
         res.status(200).json(usuarios);
     } catch (error) {
