@@ -5,18 +5,20 @@ const jwt = require('jsonwebtoken');
 // Registrar un nuevo usuario
 exports.registrarUsuario = async (req, res) => {
     try {
+        console.log("Datos recibidos en el registro:", req.body); // Verificar el contenido de req.body
         const { nombre, email, password } = req.body;
         const usuarioExistente = await Usuario.findOne({ email });
         if (usuarioExistente) {
             return res.status(400).json({ message: 'El usuario ya existe' });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log("Contraseña encriptada generada:", hashedPassword); // Verificar el hash generado
         const nuevoUsuario = new Usuario({ nombre, email, password: hashedPassword });
         await nuevoUsuario.save();
         res.status(201).json(nuevoUsuario);
     } catch (error) {
-        if (error.code === 11000) { 
-            return res.status(400).json({ message: 'El usuario ya existe' }); 
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'El usuario ya existe' });
         }
         res.status(500).json({ message: error.message });
     }
@@ -26,11 +28,15 @@ exports.registrarUsuario = async (req, res) => {
 exports.iniciarSesion = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Contraseña ingresada desde req.body:', password); // Verificar que la contraseña no sea undefined
         const usuario = await Usuario.findOne({ email });
         if (!usuario) {
             return res.status(400).json({ message: 'Credenciales incorrectas' });
         }
+        console.log('Usuario encontrado:', usuario);
+        console.log('Contraseña encriptada en la base de datos:', usuario.password);
         const esPasswordCorrecta = await bcrypt.compare(password, usuario.password);
+        console.log('Comparación de contraseñas:', esPasswordCorrecta);
         if (!esPasswordCorrecta) {
             return res.status(400).json({ message: 'Credenciales incorrectas' });
         }

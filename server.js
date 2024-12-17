@@ -2,25 +2,23 @@ require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3003;
 
 // Middleware
-app.use(bodyParser.json());
 app.use(cors());
+app.use(express.json()); // Asegurarse de que express.json() esté configurado
 
 // Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(() => {
-    console.log('Conectado a MongoDB');
-}).catch(err => {
-    console.error('Error al conectar a MongoDB', err);
-});
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => {
+        console.log('Conectado a MongoDB');
+    })
+    .catch(err => {
+        console.error('Error al conectar a MongoDB', err);
+    });
 
 // Rutas
 app.get('/', (req, res) => {
