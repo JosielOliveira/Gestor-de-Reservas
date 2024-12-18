@@ -15,7 +15,8 @@ exports.registrarUsuario = async (req, res) => {
         console.log("Contraseña encriptada generada:", hashedPassword); // Verificar el hash generado
         const nuevoUsuario = new Usuario({ nombre, email, password: hashedPassword });
         await nuevoUsuario.save();
-        res.status(201).json(nuevoUsuario);
+        const token = jwt.sign({ id: nuevoUsuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(201).json({ usuario: nuevoUsuario, token });
     } catch (error) {
         if (error.code === 11000) {
             return res.status(400).json({ message: 'El usuario ya existe' });
