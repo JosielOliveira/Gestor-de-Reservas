@@ -10,7 +10,7 @@ const {
     actualizarUsuario,
     eliminarUsuario,
     actualizarRolUsuario
-} = require('../controllers/usuarioController');
+} = require('../controllers/usuarioController-x');
 
 // Ruta para registrar un nuevo usuario
 router.post('/register', registrarUsuario);
