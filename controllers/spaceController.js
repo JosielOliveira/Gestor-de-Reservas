@@ -1,4 +1,4 @@
-const Espacio = require('../models/Espacio');
+const Espacio = require('../models/Space');
 
 // Obtener todos los espacios
 exports.obtenerEspacios = async (req, res) => {

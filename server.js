@@ -1,41 +1,25 @@
-require('dotenv').config();
-
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const dotenv = require('dotenv');
+const userRoutes = require('./routes/userRoutes'); // Importar rutas de usuario
+const spaceRoutes = require('./routes/spaceRoutes'); // Importar rutas de espacio
+const reservationRoutes = require('./routes/reservationRoutes'); // Importar rutas de reserva
+
+// Configurar dotenv para cargar las variables de entorno
+dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3003;
+app.use(express.json());
 
-// Middleware
-app.use(cors());
-app.use(express.json()); // Asegurarse de que express.json() esté configurado
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+.then(() => console.log('Conectado a MongoDB'))
+.catch(err => console.error('Error al conectar a MongoDB', err));
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => {
-        console.log('Conectado a MongoDB');
-    })
-    .catch(err => {
-        console.error('Error al conectar a MongoDB', err);
-    });
+// Usar las rutas
+app.use('/api/users', userRoutes);
+app.use('/api/spaces', spaceRoutes);
+app.use('/api/reservations', reservationRoutes);
 
-// Rutas
-app.get('/', (req, res) => {
-    res.send('Bienvenido al Gestor de Reservas de Espacios Deportivos');
-});
-
-// Importa las rutas
-const usuarioRoutes = require('./routes/usuarioRoutes');
-const espacioRoutes = require('./routes/espacioRoutes');
-const reservaRoutes = require('./routes/reservaRoutes');
-
-// Middleware de rutas
-app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/espacios', espacioRoutes);
-app.use('/api/reservas', reservaRoutes);
-
-// Iniciar el servidor
-app.listen(port, () => {
-    console.log(`Servidor corriendo en http://localhost:${port}`);
+app.listen(process.env.PORT, () => {
+console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
 });

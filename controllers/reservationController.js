@@ -1,5 +1,5 @@
-const Reserva = require('../models/Reserva');
-const Espacio = require('../models/Espacio');
+const Reserva = require('../models/Reservation');
+const Espacio = require('../models/Space');
 
 // Validar disponibilidad de espacio
 const validarDisponibilidad = async (espacioId, fechaInicio, fechaFin) => {
