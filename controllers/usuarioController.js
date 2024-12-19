@@ -11,12 +11,29 @@ exports.registrarUsuario = async (req, res) => {
         if (usuarioExistente) {
             return res.status(400).json({ message: 'El usuario ya existe' });
         }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        console.log("Contraseña encriptada generada:", hashedPassword); // Verificar el hash generado
+        
+        // Verificar si la contraseña ya está encriptada
+        let hashedPassword;
+        if (password.startsWith('$2b$')) {
+            // Contraseña ya encriptada, no encriptar nuevamente
+            hashedPassword = password;
+            console.log("Contraseña ya encriptada recibida:", hashedPassword);
+        } else {
+            // Contraseña en texto plano, encriptarla
+            hashedPassword = await bcrypt.hash(password, 10);
+            console.log("Contraseña encriptada generada:", hashedPassword);
+        }
+
+        // Registrar el nuevo usuario
         const nuevoUsuario = new Usuario({ nombre, email, password: hashedPassword });
         await nuevoUsuario.save();
         const token = jwt.sign({ id: nuevoUsuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(201).json({ usuario: nuevoUsuario, token });
+        
+        // Eliminar el campo 'password' del objeto usuario antes de enviarlo en la respuesta
+        const usuarioSinPassword = nuevoUsuario.toObject();
+        delete usuarioSinPassword.password;
+
+        res.status(201).json({ usuario: usuarioSinPassword, token });
     } catch (error) {
         if (error.code === 11000) {
             return res.status(400).json({ message: 'El usuario ya existe' });
@@ -42,7 +59,12 @@ exports.iniciarSesion = async (req, res) => {
             return res.status(400).json({ message: 'Credenciales incorrectas' });
         }
         const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.status(200).json({ token });
+        
+        // Eliminar el campo 'password' del objeto usuario antes de enviarlo en la respuesta
+        const usuarioSinPassword = usuario.toObject();
+        delete usuarioSinPassword.password;
+
+        res.status(200).json({ usuario: usuarioSinPassword, token });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -50,9 +72,14 @@ exports.iniciarSesion = async (req, res) => {
 
 // Obtener todos los usuarios
 exports.obtenerUsuarios = async (req, res) => {
-    try { 
+    try {
         const usuarios = await Usuario.find();
-        res.status(200).json(usuarios);
+        const usuariosSinPassword = usuarios.map(usuario => {
+            const usuarioObj = usuario.toObject();
+            delete usuarioObj.password;
+            return usuarioObj;
+        });
+        res.status(200).json(usuariosSinPassword);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -65,7 +92,9 @@ exports.obtenerUsuarioPorId = async (req, res) => {
         if (!usuario) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-        res.status(200).json(usuario);
+        const usuarioSinPassword = usuario.toObject();
+        delete usuarioSinPassword.password;
+        res.status(200).json(usuarioSinPassword);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -78,7 +107,9 @@ exports.actualizarUsuario = async (req, res) => {
         if (!usuario) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-        res.status(200).json(usuario);
+        const usuarioSinPassword = usuario.toObject();
+        delete usuarioSinPassword.password;
+        res.status(200).json(usuarioSinPassword);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -105,7 +136,9 @@ exports.actualizarRolUsuario = async (req, res) => {
         if (!usuario) {
             return res.status(404).json({ message: 'Usuario no encontrado' });
         }
-        res.status(200).json(usuario);
+        const usuarioSinPassword = usuario.toObject();
+        delete usuarioSinPassword.password;
+        res.status(200).json(usuarioSinPassword);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

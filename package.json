@@ -12,12 +12,12 @@
   },
   "name": "gestor-de-reservas",
   "version": "1.0.0",
-  "description": "--> Ruta de Trabajo",
+  "description": "Aplicación para gestionar reservas con autenticación JWT",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Josiel Oliveira",
   "license": "ISC"
 }
