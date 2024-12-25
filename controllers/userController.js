@@ -1,4 +1,3 @@
-// userController.js 
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,31 +5,57 @@ const jwt = require('jsonwebtoken');
 // Crear un nuevo usuario
 exports.createUser = async (req, res) => {
   try {
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    const user = new User({ ...req.body, password: hashedPassword });
+    const { email, username, password } = req.body;
+
+    // Verificar si el correo electrónico ya está registrado
+    const existingUserEmail = await User.findOne({ email });
+    if (existingUserEmail) {
+      return res.status(400).send('El correo electrónico ya está registrado');
+    }
+
+    // Verificar si el nombre de usuario ya está registrado (puedes quitar esto si no te importa que el username sea duplicado)
+    // const existingUserName = await User.findOne({ username });
+    // if (existingUserName) {
+    //   return res.status(400).send('El nombre de usuario ya está registrado');
+    // }
+
+    // Encriptar la contraseña
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Crear el nuevo usuario
+    const user = new User({
+      email,
+      username,  // Aunque no se valida el username, se guarda igualmente
+      password: hashedPassword,
+    });
+
+    // Guardar el usuario en la base de datos
     await user.save();
-    res.status(201).send(user);
+    res.status(201).send({
+      message: 'Usuario creado exitosamente', 
+      user: { email: user.email, username: user.username }  // Devolvemos solo email y username por razones de seguridad
+    });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: error.message });
   }
 };
 
-// Iniciar sesión de usuario
+// Iniciar sesión de usuario (cambio a login por email)
 exports.loginUser = async (req, res) => {
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = req.body;  // Cambié username por email
+    const user = await User.findOne({ email });  // Buscamos por email en lugar de username
     if (!user) {
-      return res.status(400).send('User not found');
+      return res.status(400).send('Usuario no encontrado');
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).send('Incorrect password');
+      return res.status(400).send('Contraseña incorrecta');
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.send({ token });
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: error.message });
   }
 };
 
@@ -39,11 +64,11 @@ exports.getUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send('Usuario no encontrado');
     }
     res.send(user);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: error.message });
   }
 };
 
@@ -51,16 +76,16 @@ exports.getUserProfile = async (req, res) => {
 exports.updateUser = async (req, res) => {
   try {
     const updates = Object.keys(req.body);
-    const allowedUpdates = ['username', 'password'];
+    const allowedUpdates = ['username', 'password']; // Solo permitimos actualizar username y password
     const isValidOperation = updates.every(update => allowedUpdates.includes(update));
 
     if (!isValidOperation) {
-      return res.status(400).send('Update not allowed');
+      return res.status(400).send('Operación no permitida');
     }
 
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send('Usuario no encontrado');
     }
 
     updates.forEach(update => user[update] = req.body[update]);
@@ -70,7 +95,7 @@ exports.updateUser = async (req, res) => {
     await user.save();
     res.send(user);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: error.message });
   }
 };
 
@@ -79,10 +104,10 @@ exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.user._id);
     if (!user) {
-      return res.status(404).send('User not found');
+      return res.status(404).send('Usuario no encontrado');
     }
     res.send(user);
   } catch (error) {
-    res.status(400).send(error);
+    res.status(400).send({ error: error.message });
   }
 };
