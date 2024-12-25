@@ -1,94 +1,94 @@
-const Reserva = require('../models/Reservation');
-const Espacio = require('../models/Space');
+const Reservation = require('../models/Reservation');
+const Space = require('../models/Space');
 
 // Validar disponibilidad de espacio
-const validarDisponibilidad = async (espacioId, fechaInicio, fechaFin) => {
-    const reservas = await Reserva.find({
-        espacio: espacioId,
+const validateAvailability = async (spaceId, startDate, endDate) => {
+    const reservations = await Reservation.find({
+        space: spaceId,
         $or: [
-            { fechaInicio: { $lt: fechaFin, $gte: fechaInicio } },
-            { fechaFin: { $gt: fechaInicio, $lte: fechaFin } }
+            { startDate: { $lt: endDate, $gte: startDate } },
+            { endDate: { $gt: startDate, $lte: endDate } }
         ]
     });
-    return reservas.length === 0;
+    return reservations.length === 0;
 };
 
 // Crear una nueva reserva
-exports.crearReserva = async (req, res) => {
+exports.createReservation = async (req, res) => {
     try {
-        const { espacio, fechaInicio, fechaFin } = req.body;
-        const disponible = await validarDisponibilidad(espacio, fechaInicio, fechaFin);
-        if (!disponible) {
-            return res.status(400).json({ message: 'El espacio no está disponible en las fechas seleccionadas' });
+        const { space, startDate, endDate } = req.body;
+        const available = await validateAvailability(space, startDate, endDate);
+        if (!available) {
+            return res.status(400).json({ message: 'The space is not available for the selected dates' });
         }
-        const nuevaReserva = new Reserva({ usuario: req.user.id, espacio, fechaInicio, fechaFin });
-        await nuevaReserva.save();
-        res.status(201).json(nuevaReserva);
+        const newReservation = new Reservation({ user: req.user.id, space, startDate, endDate });
+        await newReservation.save();
+        res.status(201).json(newReservation);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
 // Obtener todas las reservas
-exports.obtenerReservas = async (req, res) => {
+exports.getAllReservations = async (req, res) => {
     try {
-        const reservas = await Reserva.find().populate('usuario').populate('espacio');
-        res.status(200).json(reservas);
+        const reservations = await Reservation.find().populate('user').populate('space');
+        res.status(200).json(reservations);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
 // Obtener una reserva por ID
-exports.obtenerReservaPorId = async (req, res) => {
+exports.getReservationById = async (req, res) => {
     try {
-        const reserva = await Reserva.findById(req.params.id).populate('usuario').populate('espacio');
-        if (!reserva) {
-            return res.status(404).json({ message: 'Reserva no encontrada' });
+        const reservation = await Reservation.findById(req.params.id).populate('user').populate('space');
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
         }
-        res.status(200).json(reserva);
+        res.status(200).json(reservation);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
 // Actualizar una reserva
-exports.actualizarReserva = async (req, res) => {
+exports.updateReservation = async (req, res) => {
     try {
-        const reserva = await Reserva.findById(req.params.id);
-        if (!reserva) {
-            return res.status(404).json({ message: 'Reserva no encontrada' });
+        const reservation = await Reservation.findById(req.params.id);
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
         }
-        if (reserva.usuario.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'No tienes permiso para actualizar esta reserva' });
+        if (reservation.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'You do not have permission to update this reservation' });
         }
-        const { espacio, fechaInicio, fechaFin } = req.body;
-        const disponible = await validarDisponibilidad(espacio, fechaInicio, fechaFin);
-        if (!disponible) {
-            return res.status(400).json({ message: 'El espacio no está disponible en las fechas seleccionadas' });
+        const { space, startDate, endDate } = req.body;
+        const available = await validateAvailability(space, startDate, endDate);
+        if (!available) {
+            return res.status(400).json({ message: 'The space is not available for the selected dates' });
         }
-        reserva.espacio = espacio;
-        reserva.fechaInicio = fechaInicio;
-        reserva.fechaFin = fechaFin;
-        await reserva.save();
-        res.status(200).json(reserva);
+        reservation.space = space;
+        reservation.startDate = startDate;
+        reservation.endDate = endDate;
+        await reservation.save();
+        res.status(200).json(reservation);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
 // Eliminar una reserva
-exports.eliminarReserva = async (req, res) => {
+exports.deleteReservation = async (req, res) => {
     try {
-        const reserva = await Reserva.findById(req.params.id);
-        if (!reserva) {
-            return res.status(404).json({ message: 'Reserva no encontrada' });
+        const reservation = await Reservation.findById(req.params.id);
+        if (!reservation) {
+            return res.status(404).json({ message: 'Reservation not found' });
         }
-        if (reserva.usuario.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'No tienes permiso para eliminar esta reserva' });
+        if (reservation.user.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'You do not have permission to delete this reservation' });
         }
-        await reserva.remove();
-        res.status(200).json({ message: 'Reserva eliminada' });
+        await reservation.remove();
+        res.status(200).json({ message: 'Reservation deleted' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -1,61 +1,61 @@
-const Espacio = require('../models/Space');
+const Space = require('../models/Space');
+
+// Crear un nuevo espacio
+exports.createSpace = async (req, res) => {
+  try {
+    const space = new Space(req.body);
+    await space.save();
+    res.status(201).send(space);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
 
 // Obtener todos los espacios
-exports.obtenerEspacios = async (req, res) => {
-    try {
-        const espacios = await Espacio.find();
-        res.status(200).json(espacios);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+exports.getAllSpaces = async (req, res) => {
+  try {
+    const spaces = await Space.find();
+    res.send(spaces);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 };
 
 // Obtener un espacio por ID
-exports.obtenerEspacioPorId = async (req, res) => {
-    try {
-        const espacio = await Espacio.findById(req.params.id);
-        if (!espacio) {
-            return res.status(404).json({ message: 'Espacio no encontrado' });
-        }
-        res.status(200).json(espacio);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+exports.getSpaceById = async (req, res) => {
+  try {
+    const space = await Space.findById(req.params.id);
+    if (!space) {
+      return res.status(404).send('Space not found');
     }
-};
-
-// Crear un nuevo espacio
-exports.crearEspacio = async (req, res) => {
-    try {
-        const nuevoEspacio = new Espacio(req.body);
-        await nuevoEspacio.save();
-        res.status(201).json(nuevoEspacio);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    res.send(space);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 };
 
 // Actualizar un espacio
-exports.actualizarEspacio = async (req, res) => {
-    try {
-        const espacio = await Espacio.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!espacio) {
-            return res.status(404).json({ message: 'Espacio no encontrado' });
-        }
-        res.status(200).json(espacio);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+exports.updateSpace = async (req, res) => {
+  try {
+    const space = await Space.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!space) {
+      return res.status(404).send('Space not found');
     }
+    res.send(space);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 };
 
 // Eliminar un espacio
-exports.eliminarEspacio = async (req, res) => {
-    try {
-        const espacio = await Espacio.findByIdAndDelete(req.params.id);
-        if (!espacio) {
-            return res.status(404).json({ message: 'Espacio no encontrado' });
-        }
-        res.status(200).json({ message: 'Espacio eliminado' });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+exports.deleteSpace = async (req, res) => {
+  try {
+    const space = await Space.findByIdAndDelete(req.params.id);
+    if (!space) {
+      return res.status(404).send('Space not found');
     }
+    res.send(space);
+  } catch (error) {
+    res.status(400).send(error);
+  }
 };

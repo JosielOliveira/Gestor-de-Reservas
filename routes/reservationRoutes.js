@@ -1,13 +1,32 @@
 const express = require('express');
-const reservationController = require('../controllers/reservationController');
-const authMiddleware = require('../middleware/authMiddleware');
+const Reservation = require('../models/Reservation'); // Modelo de Reserva
 
 const router = express.Router();
 
-router.post('/', authMiddleware, reservationController.createReservation);
-router.get('/', authMiddleware, reservationController.getAllReservations);
-router.get('/:id', authMiddleware, reservationController.getReservationById);
-router.put('/:id', authMiddleware, reservationController.updateReservation);
-router.delete('/:id', authMiddleware, reservationController.deleteReservation);
+// Crear una reserva
+router.post('/', async (req, res) => {
+    const { user, space, date } = req.body;
+
+    try {
+        const newReservation = new Reservation({ user, space, date });
+        await newReservation.save();
+
+        res.status(201).json({ message: "Reserva creada exitosamente", reservation: newReservation });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al crear la reserva" });
+    }
+});
+
+// Obtener todas las reservas
+router.get('/', async (req, res) => {
+    try {
+        const reservations = await Reservation.find();
+        res.status(200).json(reservations);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener las reservas" });
+    }
+});
 
 module.exports = router;
