@@ -20,13 +20,13 @@ exports.createUser = async (req, res) => {
     // }
 
     // Encriptar la contraseña
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // --> const hashedPassword = await bcrypt.hash(password, 10); --> ELIMINAR PARA COMPROBAR ERROR DE ENCRIPTADO  
 
     // Crear el nuevo usuario
     const user = new User({
       email,
       username,  // Aunque no se valida el username, se guarda igualmente
-      password: hashedPassword,
+      password, // --> hashedPassword, --> tambien lo cambiamos por password para comprobar el error de encriptado 
     });
 
     // Guardar el usuario en la base de datos
@@ -40,17 +40,17 @@ exports.createUser = async (req, res) => {
   }
 };
 
-// Iniciar sesión de usuario (cambio a login por email)
+// Iniciar sesión de usuario (login) 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;  // Cambié username por email
+    const { email, password } = req.body;  
     const user = await User.findOne({ email });  // Buscamos por email en lugar de username
     if (!user) {
       return res.status(400).send('Usuario no encontrado');
     }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, user.password); // Comparamos la contraseña ingresada con la contraseña encriptada en la base de datos 
     if (!isMatch) {
-      return res.status(400).send('Contraseña incorrecta');
+      return res.status(400).send('Contraseña incorrecta'); // Si no coinciden, devolvemos un error 
     }
     const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.send({ token });
