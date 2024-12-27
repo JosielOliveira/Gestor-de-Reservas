@@ -1,37 +1,15 @@
-const express = require('express');
-const Space = require('../models/Space'); // Modelo de Space
+const express = require('express'); // Importa la librería express
+const spaceController = require('../controllers/spaceController'); // Llama al controller de spaces
+const authMiddleware = require('../middleware/authMiddleware'); // Asegúrate de tener el middleware importado
 
-const router = express.Router();
+const router = express.Router(); // Crea una nueva instancia de Router
 
-// Obtener todos los espacios
-router.get('/', async (req, res) => {
-    try {
-        const spaces = await Space.find();
-        res.status(200).json(spaces);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al obtener los espacios" });
-    }
-});
+// Rutas de espacios con autenticación
 
-// Crear un espacio
-router.post('/', async (req, res) => {
-    const { name, location, capacity } = req.body;
+router.get('/', authMiddleware, spaceController.getAllSpaces); // Obtener todos los espacios
+router.post('/', authMiddleware, spaceController.createSpace); // Crear un espacio (requiere autenticación)
+router.get('/:id', authMiddleware, spaceController.getSpaceById); // Obtener un espacio por ID (requiere autenticación)
+router.put('/:id', authMiddleware, spaceController.updateSpace); // Actualizar un espacio (requiere autenticación)
+router.delete('/:id', authMiddleware, spaceController.deleteSpace); // Eliminar un espacio (requiere autenticación)
 
-    try {
-        const existingSpace = await Space.findOne({ name });
-        if (existingSpace) {
-            return res.status(400).json({ message: `El espacio "${name}" ya existe.` });
-        }
-
-        const newSpace = new Space({ name, location, capacity });
-        await newSpace.save();
-
-        res.status(201).json({ message: "Espacio creado exitosamente", space: newSpace });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al crear el espacio" });
-    }
-});
-
-module.exports = router;
+module.exports = router; // Exporta el router para usarlo en otras partes de la aplicación

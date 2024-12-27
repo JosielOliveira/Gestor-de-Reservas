@@ -1,32 +1,15 @@
-const express = require('express');
-const Reservation = require('../models/Reservation'); // Modelo de Reserva
+const express = require('express'); // Importa la librería express
+const reservationController = require('../controllers/reservationController'); // Llama al controller de reservas
+const authMiddleware = require('../middleware/authMiddleware'); // Asegúrate de tener el middleware importado
 
-const router = express.Router();
+const router = express.Router(); // Crea una nueva instancia de Router
 
-// Crear una reserva
-router.post('/', async (req, res) => {
-    const { user, space, date } = req.body;
+// Rutas de reservas con autenticación
 
-    try {
-        const newReservation = new Reservation({ user, space, date });
-        await newReservation.save();
+router.post('/', authMiddleware, reservationController.createReservation); // Crear una reserva (requiere autenticación)
+router.get('/', authMiddleware, reservationController.getAllReservations); // Obtener todas las reservas (requiere autenticación)
+router.get('/:id', authMiddleware, reservationController.getReservationById); // Obtener una reserva por ID (requiere autenticación)
+router.put('/:id', authMiddleware, reservationController.updateReservation); // Actualizar una reserva (requiere autenticación)
+router.delete('/:id', authMiddleware, reservationController.deleteReservation); // Eliminar una reserva (requiere autenticación)
 
-        res.status(201).json({ message: "Reserva creada exitosamente", reservation: newReservation });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al crear la reserva" });
-    }
-});
-
-// Obtener todas las reservas
-router.get('/', async (req, res) => {
-    try {
-        const reservations = await Reservation.find();
-        res.status(200).json(reservations);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al obtener las reservas" });
-    }
-});
-
-module.exports = router;
+module.exports = router; // Exporta el router para usarlo en otras partes de la aplicación
