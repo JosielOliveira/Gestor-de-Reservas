@@ -15,17 +15,38 @@
 3. Estructura del Proyecto
 - Crear la estructura de carpetas:
 
-/gestor-reservas
-├── /config
-├── /controllers
-├── /models
-├── /routes
-├── /middlewares
-├── /utils
-├── /views (si decides usar plantillas)
-├── /public (para archivos estáticos)
+gestor-de-reservas/
+├── config/
+│   └── config.js (si tienes configuraciones adicionales)
+├── controllers/
+│   └── reservationController.js
+│   └── spaceController.js
+│   └── userController.js
+├── middleware/
+│   └── authMiddleware.js
+├── models/
+│   └── Reservation.js
+│   └── Space.js
+│   └── User.js
+├── routes/
+│   └── reservationRoutes.js
+│   └── spaceRoutes.js
+│   └── userRoutes.js
+├── utils/ (si tienes utilidades adicionales)
+│   └── utils.js
+├── views/ (si decides usar plantillas)
+│   └── index.ejs
+├── public/ (para archivos estáticos)
+│   └── css/
+│       └── styles.css
+│   └── js/
+│       └── scripts.js
+│   └── images/
+│       └── logo.png
+├── .env
 ├── server.js
-└── package.json
+├── package.json
+└── README.md
 
 4. Configuración de la Base de Datos
 - Configurar MongoDB (puedes usar MongoDB Atlas para una base de datos en la nube).
