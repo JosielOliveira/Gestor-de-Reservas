@@ -1,5 +1,6 @@
 const Reservation = require('../models/Reservation');
 const Space = require('../models/Space');
+const moment = require('moment');
 
 // Validar disponibilidad de espacio
 const validateAvailability = async (spaceId, date, time) => {
@@ -15,11 +16,12 @@ const validateAvailability = async (spaceId, date, time) => {
 exports.createReservation = async (req, res) => {
   try {
     const { space, date, time } = req.body;
-    const available = await validateAvailability(space, date, time);
+    const formattedDate = moment(date, 'DD-MM-YYYY').toISOString();
+    const available = await validateAvailability(space, formattedDate, time);
     if (!available) {
       return res.status(400).json({ message: 'The space is not available for the selected date and time' });
     }
-    const newReservation = new Reservation({ user: req.user._id, space, date, time });
+    const newReservation = new Reservation({ user: req.user._id, space, date: formattedDate, time });
     await newReservation.save();
     res.status(201).json(newReservation);
   } catch (error) {
@@ -61,12 +63,13 @@ exports.updateReservation = async (req, res) => {
       return res.status(403).json({ message: 'You do not have permission to update this reservation' });
     }
     const { space, date, time } = req.body;
-    const available = await validateAvailability(space, date, time);
+    const formattedDate = moment(date, 'DD-MM-YYYY').toISOString();
+    const available = await validateAvailability(space, formattedDate, time);
     if (!available) {
       return res.status(400).json({ message: 'The space is not available for the selected date and time' });
     }
     reservation.space = space;
-    reservation.date = date;
+    reservation.date = formattedDate;
     reservation.time = time;
     await reservation.save();
     res.status(200).json(reservation);
