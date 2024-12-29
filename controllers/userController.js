@@ -99,6 +99,16 @@ exports.updateUser = async (req, res) => {
   }
 };
 
+// Obtener todos los usuarios
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.send(users);
+  } catch (error) {
+    res.status(400).send(error);
+  }
+};
+
 // Eliminar un usuario
 exports.deleteUser = async (req, res) => {
   try {

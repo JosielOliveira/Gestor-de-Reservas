@@ -9,6 +9,7 @@ router.post('/register', userController.createUser);
 router.post('/login', userController.loginUser);
 router.get('/profile', authMiddleware, userController.getUserProfile);
 router.put('/profile', authMiddleware, userController.updateUser);
+router.get('/', authMiddleware, userController.getAllUsers);
 router.delete('/profile', authMiddleware, userController.deleteUser);
 
 module.exports = router;
